@@ -1,0 +1,203 @@
+Food poo;
+
+class Snake {
+  PVector vect;
+  boolean dead = false;
+  
+  PVector[] list = new PVector[0];
+  
+  Brain b = new Brain();
+  
+  
+  Snake() {
+    vect = new PVector(width/2,  height/2);
+    b.occ[(int)vect.x/20][(int)vect.y/20] = true;
+    list = (PVector[]) append(list, vect);
+    
+    //for (int i = 0; i < 5; i++) {
+    //  for (int j = 0; j < 5; j++) {
+    //    println(b.board[i][j].x);
+    //  }
+    //}
+    
+    
+  }
+  
+  
+  void show() {
+    fill(0);
+    square(vect.x, vect.y, 20);
+    for (int i = 1; i < list.length; i++) {
+      fill(0);
+      square(list[i].x, list[i].y, 20);
+    }
+  }
+  
+  void move() {
+    float currx = list[0].x;
+    float curry = list[0].y;
+    float tempx;
+    float tempy;
+    int endtempx = (int)list[list.length-1].x/20;
+    int endtempy = (int)list[list.length-1].y/20;
+    
+    for (int i = 1; i < list.length; i++) {
+      tempx = list[i].x;
+      tempy = list[i].y;
+      list[i].x = currx;
+      list[i].y = curry;
+      currx = tempx;
+      curry = tempy;
+    }
+    b.occ[endtempx][endtempy] = false;
+    
+    if (shortcut()) {
+    } else {
+      simple();
+    }
+    
+    
+  
+    b.occ[(int)vect.x/20][(int)vect.y/20] = true;
+    //delay(100);
+    
+  }
+  
+  int simple() {
+    PVector move = b.board[(int)vect.x/20][(int)vect.y/20];
+    if ((int)vect.x/20 < move.x) {
+      vect.x += 20;
+      return 1;
+    } else if ((int)vect.x/20 > move.x) {
+      vect.x -= 20;
+      return 2;
+    } else if ((int)vect.y/20 < move.y) {
+      vect.y += 20;
+      return 3;
+    } else {
+      vect.y -= 20;
+      return 4;
+    }
+  }
+  
+  boolean shortcut() {
+    if (list.length > 150) {
+      return false;
+    }
+    int foodx = (int)poo.x / 20;
+    int foody = (int)poo.y / 20;
+    
+    int endx = (int)list[list.length-1].x / 20;
+    int endy = (int)list[list.length-1].y / 20;
+    
+    int currx = (int)vect.x / 20;
+    int curry = (int)vect.y / 20;
+    
+    int potenx = -1;
+    int poteny = -1;
+    int potenloc = -1;
+    
+    int foodloc = b.order[foodx][foody];
+    
+    int currloc = b.order[currx][curry];
+    
+    int endloc = b.order[endx][endy];
+    
+    if (currx != 0) {
+      if (abs(b.order[currx-1][curry] - currloc) > 1) {
+        potenx = currx - 1;
+        poteny = curry;
+      }
+    }
+    if (currx != 19) {
+      if (abs(b.order[currx+1][curry] - currloc) > 1) {
+        potenx = currx + 1;
+        poteny = curry;
+      }
+    }
+    if (curry != 0) {
+      if (abs(b.order[currx][curry - 1] - currloc) > 1) {
+        potenx = currx;
+        poteny = curry - 1;
+      }
+    }
+    if (curry != 19) {
+      if (abs(b.order[currx][curry + 1] - currloc) > 1) {
+        potenx = currx;
+        poteny = curry + 1;
+      }
+    }
+    
+    if (potenx != -1 && poteny != -1) {
+      potenloc = b.order[potenx][poteny];
+    }
+    
+    if (potenloc != -1 && potenloc != 140) {
+      if (cut(foodloc, currloc, endloc, potenloc)) {
+        vect.x = potenx * 20;
+        vect.y = poteny * 20;
+        return true;
+      }
+    }
+    
+    return false;
+  }
+  
+  boolean cut(int food, int curr, int end, int cut) {
+    if (cut < food && curr < cut && end < cut) {
+      return true;
+    } else if (food < curr && food < end && food < cut && curr < cut) {
+      return true;
+    }
+    return false;
+  }
+  
+    
+  void collide() {
+    boolean test = true;
+    while (test) {
+      poo.x = (int) random(20) * 20;
+      poo.y = (int) random(20) * 20;
+      if (!b.occ[(int)poo.x/20][(int)poo.y/20]) {
+        test = false;
+      }
+    }
+    
+    
+    PVector curr = list[list.length - 1];
+    PVector add = new PVector(curr.x, curr.y);
+    list = (PVector[]) append(list, add);
+    //if (input == 1) {
+    //  add = new PVector(curr.x - 20, curr.y);
+    //  list = (PVector[]) append(list, add);
+    //} else if (input == 2) {
+    //  add = new PVector(curr.x + 20, curr.y);
+    //  list = (PVector[]) append(list, add);
+    //} else if (input == 3) {
+    //  add = new PVector(curr.x, curr.y - 20);
+    //  list = (PVector[]) append(list, add);
+    //} else {
+    //  add = new PVector(curr.x, curr.y + 20);
+    //  list = (PVector[]) append(list, add);
+    //}
+    //show();
+    println(list.length);
+  }
+  
+  void update() {
+    if (!dead) {
+      move();
+      if (vect.x == poo.x && vect.y == poo.y) {
+        collide();
+      }
+      //if (vect.x < 0 || vect.x > width - 10 || vect.y < 0 || vect.y > height - 10) {
+      //  dead = true;
+      //  if (vect.x > width - 10) {
+      //    vect.x -= 20;
+      //  } else if (vect.y > height - 10) {
+      //    vect.y -= 20;
+      //  }
+      //}
+    }
+  }
+}
