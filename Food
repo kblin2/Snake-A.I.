@@ -1,0 +1,15 @@
+class Food {
+  float x;
+  float y;
+  
+  Food() {
+    x = (int) random(20) * 20;
+    y = (int) random(20) * 20;
+    
+  }
+  
+  void show() {
+    fill(200);
+    square(x, y, 20);
+  }
+}
