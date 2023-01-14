@@ -1,0 +1,22 @@
+Snake test;
+
+
+void setup() {
+  size(400, 400);
+  test = new Snake();
+  poo = new Food();
+}
+
+void draw() {
+  background(255);
+  for (int i = 0; i < 20; i++) {
+    line(i * 20, 0, i * 20, 400);
+  }
+  for (int j = 0; j < 20; j++) {
+    line(0, j * 20, 400, j * 20);
+  }
+  //line(20, 0, 20, 0);
+  test.show();
+  poo.show();
+  test.update();
+}
